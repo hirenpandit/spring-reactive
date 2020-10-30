@@ -1,5 +1,8 @@
 package com.example.reactivespring.controller;
 
+import com.example.reactivespring.configuration.IntervalMessageProducer;
+import com.example.reactivespring.entity.GreetingRequest;
+import com.example.reactivespring.entity.GreetingResponse;
 import com.example.reactivespring.entity.Reservation;
 import com.example.reactivespring.repository.ReservationRepository;
 import lombok.AllArgsConstructor;
@@ -37,27 +40,3 @@ public class ReservationController {
 
 }
 
-@Component
-class IntervalMessageProducer {
-    Flux<GreetingResponse> produce(GreetingRequest request) {
-        return Flux
-                .fromStream(Stream.generate(() -> "Hello, "+request.getName()+" @ "+ Instant.now()))
-                .map(GreetingResponse::new)
-                .delayElements(Duration.ofSeconds(1));
-    }
-}
-
-@Component
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-class GreetingRequest {
-    String name;
-}
-@Component
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-class GreetingResponse {
-    String greeting;
-}

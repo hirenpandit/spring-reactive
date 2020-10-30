@@ -1,6 +1,9 @@
 spring:
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-      database: testdb
+  rsocket:
+    server:
+      port: 8000
+
+logging:
+  level:
+    ROOT: DEBUG
+
