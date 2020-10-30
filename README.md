@@ -61,3 +61,117 @@ flux.subscribe();
 ```
 
 ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8078fefc-573e-4ee7-b32d-5d13bfb99bf5/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8078fefc-573e-4ee7-b32d-5d13bfb99bf5/Untitled.png)
+
+
+### Demo Application
+
+*Webflux with reactive mongoDB demo:*
+
+To demonstrate spring reactive implementation we have created two Springboot based applications as you can see in repository. First application named reactive-spring, will demonstrate spring framework's reactive nature with web-flux. We are using embedded MongDB  as document based database and for reactive, non-blocking nature we are using mongodb-reactive. 
+
+```xml
+    <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+		</dependency>
+    <dependency>
+			<groupId>de.flapdoodle.embed</groupId>
+			<artifactId>de.flapdoodle.embed.mongo</artifactId>
+		</dependency>
+```
+
+we are using web-flux to handle the request response. 
+
+```xml
+    <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+```
+
+To make db operations non-blocking we are using `ReactiveCrudRepository<T, U>`. This will perform all database operation like `save`, `delete`, `findOne`, `findAll` etc. just like `JPARepository` but in non-blocking (reactive) fashion. 
+
+*Webflux:*
+
+Now, to demonstrate the reactive implementation of spring we are using `webflux` and created a controller. The controller has an endpoint which when called get the values from MongoDB (which we are adding at the time of application startup) and publish it in response. Please check the `ReservationController.java`.
+
+To emit stream of infinite values we have created endpoint `/see/{name}` in `[ReservationController.java](http://reservationcontroller.java)` this endpoint will created message with timestamp and publish it in interval of 1 second.
+
+*How to run:*
+
+Running the application is similar to running any springboot application. Go to reactive-spring folder. Run command `mvn clean package` and then run the .jar file created in target folder with `java -jar` command. As the application start we can see in the logs that it is running on netty server (non blocking io) instead of normal tomcat server.
+
+```
+2020-10-30 14:20:54.166  INFO 36395 --- [  restartedMain] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port(s): 8080
+2020-10-30 14:20:54.189  INFO 36395 --- [  restartedMain] o.s.b.rsocket.netty.NettyRSocketServer   : Netty RSocket started on port(s): 8000
+```
+
+*RSocket demo:*
+
+To demonstrate use of RSocket we are going to use spring-reactive application as server and spring-rsocket-client as client application. Bothe the application are springboot applications. 
+
+1. To make spring-reactive application as server we will add rsocket dependency and define the port on which rsocket will listen.
+
+```xml
+    <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-rsocket</artifactId>
+		</dependency>
+```
+
+In applicatio.yml
+
+```yaml
+**spring:
+  rsocket:
+    server:
+      port: 8000**
+```
+
+2. Now we are going to create a route endpoint at which request will be received and processed. After the request is processed we will publish the response. Please check `RSocketGreetingsController.java`
+
+```java
+    @MessageMapping(value = "greetings")
+    Flux<GreetingResponse> greet(GreetingRequest request) {
+        return messageProducer.produce(request);
+    }
+```
+
+3. Once the server is ready, we are going to created below `Beans` in client application (i.e spring-rsocket-client). This will establish connection to our server application via rsocket.
+
+```java
+@Bean
+	RSocket rSocket(){
+		return RSocketFactory
+				.connect()
+				.dataMimeType(MimeTypeUtils.APPLICATION_JSON_VALUE)
+				.frameDecoder(PayloadDecoder.ZERO_COPY)
+				.transport(TcpClientTransport.create(8000))
+				.start().block();
+	}
+
+	@Bean
+	RSocketRequester requester(RSocketStrategies strategies) {
+		return RSocketRequester.builder()
+				.rsocketFactory(clientRSocketFactory ->
+						clientRSocketFactory
+								.dataMimeType(MimeTypeUtils.ALL_VALUE)
+								.frameDecoder(PayloadDecoder.ZERO_COPY))
+				.rsocketStrategies(strategies)
+				.connect(TcpClientTransport.create(8000))
+				.retry().block();
+	}
+```
+
+4. Now we are going to create simple @RestController in client application which will make call to our server application over rsocket and publish the response. To make request with rsocket RsocketRequest is used which is similar to RestTemplate in RESTful application.
+
+```java
+private final RSocketRequester requester;
+
+    @GetMapping(value = "/greetings/{name}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    Publisher<GreetingResponse> greetingResponsePublisher(@PathVariable String name) {
+        return requester.route("greetings")
+                .data(new GreetingRequest(name))
+                .retrieveFlux(GreetingResponse.class);
+    }
+```
