@@ -71,22 +71,22 @@ To demonstrate spring reactive implementation we have created two Springboot bas
 
 ```xml
     <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
-		</dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+    </dependency>
     <dependency>
-			<groupId>de.flapdoodle.embed</groupId>
-			<artifactId>de.flapdoodle.embed.mongo</artifactId>
-		</dependency>
+	<groupId>de.flapdoodle.embed</groupId>
+	<artifactId>de.flapdoodle.embed.mongo</artifactId>
+    </dependency>
 ```
 
 we are using web-flux to handle the request response. 
 
 ```xml
     <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-		</dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
 ```
 
 To make db operations non-blocking we are using `ReactiveCrudRepository<T, U>`. This will perform all database operation like `save`, `delete`, `findOne`, `findAll` etc. just like `JPARepository` but in non-blocking (reactive) fashion. 
@@ -114,9 +114,9 @@ To demonstrate use of RSocket we are going to use spring-reactive application as
 
 ```xml
     <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-rsocket</artifactId>
-		</dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-rsocket</artifactId>
+    </dependency>
 ```
 
 In applicatio.yml
@@ -125,7 +125,7 @@ In applicatio.yml
 **spring:
   rsocket:
     server:
-      port: 8000**
+      port: 8000
 ```
 
 2. Now we are going to create a route endpoint at which request will be received and processed. After the request is processed we will publish the response. Please check `RSocketGreetingsController.java`
