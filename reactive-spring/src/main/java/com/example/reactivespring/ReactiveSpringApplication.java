@@ -64,8 +64,8 @@ class DataInitializer {
                 .subscribe(System.out::println);
     }
 
-    @Bean
-    RouterFunction<ServerResponse> routes(ProductHandler handler) {
+//    @Bean
+//    RouterFunction<ServerResponse> routes(ProductHandler handler) {
 
         //two ways of defining routers for the end points
 //        return RouterFunctions.route(GET("/products")
@@ -83,13 +83,13 @@ class DataInitializer {
 //                .andRoute(GET("/products/events")
 //                        .and(accept(TEXT_EVENT_STREAM)), handler::getProductEvents);
 
-        return RouterFunctions.nest(path("/products"),
-                nest(accept(APPLICATION_JSON).or(accept(TEXT_EVENT_STREAM)),
-                        route(GET("/"), handler::getAllProducts)
-                        .andRoute(POST("/"), handler::save)
-                        .andRoute(DELETE("/"), handler::deleteAll)
-                        .andRoute(GET("/events"), handler::getProductEvents)
-                )
-        );
-    }
+//        return RouterFunctions.nest(path("/products"),
+//                nest(accept(APPLICATION_JSON).or(accept(TEXT_EVENT_STREAM)),
+//                        route(GET("/"), handler::getAllProducts)
+//                        .andRoute(POST("/"), handler::save)
+//                        .andRoute(DELETE("/"), handler::deleteAll)
+//                        .andRoute(GET("/events"), handler::getProductEvents)
+//                )
+//        );
+//    }
 }
