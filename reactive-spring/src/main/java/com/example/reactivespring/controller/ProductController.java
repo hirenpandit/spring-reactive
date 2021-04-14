@@ -5,6 +5,7 @@ import com.example.reactivespring.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,10 +25,11 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Mono<Product> getById(@PathVariable String id) {
+    public Mono<ResponseEntity<Product>> getById(@PathVariable String id) {
         log.info("Getting product by id: {}", id);
         return repository.findById(id)
-                .switchIfEmpty(Mono.empty());
+                .map(product -> ResponseEntity.ok().body(product))
+                .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()));
     }
 
     @DeleteMapping("/")
@@ -56,10 +58,8 @@ public class ProductController {
         Mono<Product> productMono = Mono.just(product);
 
         return productMono
-                .zipWith(existing, (a, b) -> {
-                    return new Product(b.getId(), a.getName(), a.getPrice());
-                })
-                .flatMap(p -> repository.save(p));
+                .zipWith(existing, (a, b) -> new Product(b.getId(), a.getName(), a.getPrice()))
+                .flatMap(repository::save);
     }
 
 }
