@@ -12,13 +12,16 @@
 //class ServerConfig {
 //    @Bean
 //    public RSocketMessageHandler rsocketMessageHandler() {
-//        RSocketMessageHandler handler = new RSocketMessageHandler(); handler.setRSocketStrategies(rsocketStrategies());
+//        RSocketMessageHandler handler = new RSocketMessageHandler();
+//        handler.setRSocketStrategies(rsocketStrategies());
 //        return handler;
 //    }
 //    @Bean
 //    public RSocketStrategies rsocketStrategies() {
 //        return RSocketStrategies.builder()
-//                .encoders(encoders -> encoders.add(new Jackson2CborEncoder())) .decoders(decoders -> decoders.add(new Jackson2CborDecoder())) .routeMatcher(new PathPatternRouteMatcher())
+//                .encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
+//                .decoders(decoders -> decoders.add(new Jackson2CborDecoder()))
+//                .routeMatcher(new PathPatternRouteMatcher())
 //                .build();
 //    } }
 //
